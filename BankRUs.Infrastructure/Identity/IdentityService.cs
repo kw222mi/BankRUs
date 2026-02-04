@@ -2,7 +2,7 @@
 using BankRUs.Application.Identity;
 using Microsoft.AspNetCore.Identity;
 
-namespace BankRUs.Intrastructure.Identity;
+namespace BankRUs.Infrastructure.Identity;
 
 public class IdentityService : IIdentityService
 {

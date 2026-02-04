@@ -1,7 +1,7 @@
 ﻿using BankRUs.Application.Services;
 using System.Net.Mail;
 
-namespace BankRUs.Intrastructure.Services;
+namespace BankRUs.Infrastructure.Services;
 
 public class FakeEmailSender : IEmailSender
 {

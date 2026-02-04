@@ -1,9 +1,9 @@
 ﻿using BankRUs.Application.Repositories;
 using BankRUs.Domain.Entities;
-using BankRUs.Intrastructure.Persistance;
+using BankRUs.Infrastructure.Persistance;
 using Microsoft.EntityFrameworkCore;
 
-namespace BankRUs.Intrastructure.Repositories;
+namespace BankRUs.Infrastructure.Repositories;
 
 public class BankAccountRepository : IBankAccountRepository
 {

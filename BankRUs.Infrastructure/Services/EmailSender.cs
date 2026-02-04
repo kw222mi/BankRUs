@@ -1,6 +1,6 @@
 ﻿using BankRUs.Application.Services;
 
-namespace BankRUs.Intrastructure.Services;
+namespace BankRUs.Infrastructure.Services;
 
 public class EmailSender : IEmailSender
 {

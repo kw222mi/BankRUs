@@ -1,9 +1,9 @@
 ﻿using BankRUs.Domain.Entities;
-using BankRUs.Intrastructure.Identity;
+using BankRUs.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace BankRUs.Intrastructure.Persistance;
+namespace BankRUs.Infrastructure.Persistance;
 
 public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options)
 {

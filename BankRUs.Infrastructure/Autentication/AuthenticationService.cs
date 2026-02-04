@@ -1,9 +1,9 @@
 ﻿using BankRUs.Application.Authentication;
 using BankRUs.Application.Authentication.AuthenticateUser;
-using BankRUs.Intrastructure.Identity;
+using BankRUs.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 
-namespace BankRUs.Intrastructure.Autentication;
+namespace BankRUs.Infrastructure.Autentication;
 
 public class AuthenticationService : IAuthenticationService
 {

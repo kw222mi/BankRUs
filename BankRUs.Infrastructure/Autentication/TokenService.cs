@@ -9,7 +9,7 @@ using System.Net.Sockets;
 using System.Security.Claims;
 using System.Text;
 
-namespace BankRUs.Intrastructure.Autentication;
+namespace BankRUs.Infrastructure.Autentication;
 
 public class TokenService : ITokenService
 {

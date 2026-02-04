@@ -15,17 +15,20 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.2" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.2" />
+    
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+  
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\BankRUs.Application\BankRUs.Application.csproj" />
     <ProjectReference Include="..\BankRUs.Domain\BankRUs.Domain.csproj" />
-    <ProjectReference Include="..\BankRUs.Intrastructure\BankRUs.Intrastructure.csproj" />
+	<ProjectReference Include="..\BankRUs.Infrastructure\BankRUs.Infrastructure.csproj" />
+
   </ItemGroup>
 
 </Project>

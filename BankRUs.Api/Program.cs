@@ -2,23 +2,28 @@ using BankRUs.Application.Authentication;
 using BankRUs.Application.Authentication.AuthenticateUser;
 using BankRUs.Application.Identity;
 using BankRUs.Application.Repositories;
+using BankRUs.Application.UseCases.CreateDeposit;
 using BankRUs.Application.UseCases.OpenAccount;
 using BankRUs.Application.UseCases.OpenBankAccount;
-using BankRUs.Application.UseCases.CreateDeposit;
 using BankRUs.Infrastructure.Configuration;
-using BankRUs.Intrastructure.Autentication;
-using BankRUs.Intrastructure.Identity;
-using BankRUs.Intrastructure.Persistance;
-using BankRUs.Intrastructure.Repositories;
-using BankRUs.Intrastructure.Services;
+using BankRUs.Infrastructure.Autentication;
+using BankRUs.Infrastructure.Identity;
+using BankRUs.Infrastructure.Persistance;
+using BankRUs.Infrastructure.Repositories;
+using BankRUs.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
+using Microsoft.OpenApi.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using IEmailSender = BankRUs.Application.Services.IEmailSender;
+
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -113,9 +118,42 @@ builder.Services
   });
 
 builder.Services.AddAuthorization();
-
-
 builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "BankRUs API",
+        Version = "v1"
+    });
+
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Skriv: Bearer {din JWT token}"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+
 
 var app = builder.Build();
 
@@ -129,6 +167,15 @@ if (app.Environment.IsDevelopment())
 
     await IdentitySeeder.SeedAsync(scope.ServiceProvider);
 }
+
+
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
 
 app.UseHttpsRedirection();
 
