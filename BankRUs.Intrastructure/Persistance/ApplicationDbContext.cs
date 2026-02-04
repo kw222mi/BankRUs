@@ -27,6 +27,8 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
             HasForeignKey(b => b.UserId);
     }
 
-    public DbSet<BankAccount> BankAccounts => Set<BankAccount>();
+    public DbSet<BankAccount> BankAccounts { get; set; }
+    public DbSet<Transaction> Transactions { get; set; }
+
 }
 

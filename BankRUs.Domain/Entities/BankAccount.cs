@@ -26,8 +26,17 @@ public class BankAccount
     public decimal Balance { get; protected set; }
     public string UserId { get; protected set; }
 
-    public void Deposit(decimal amount, string reference) { }
-    public void Withdraw(decimal amount, string reference) { }
+   
+    public void Withdraw(decimal amount, string? reference) { }
+
+    public void Deposit(decimal amount, string? reference)
+    {
+        if (amount <= 0)
+            throw new InvalidOperationException("Amount must be greater than zero.");
+
+        Balance += amount;
+    }
+
 }
 
 // Konstruktor
