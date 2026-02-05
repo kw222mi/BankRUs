@@ -1,5 +1,7 @@
 ﻿using BankRUs.Api.Dtos.BankAccounts;
+using BankRUs.Application.Common.Exceptions;
 using BankRUs.Application.UseCases.CreateDeposit;
+using BankRUs.Application.UseCases.CreateWithdrawal;
 using BankRUs.Application.UseCases.OpenBankAccount;
 using BankRUs.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
@@ -7,7 +9,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
+using System.ComponentModel.DataAnnotations;
+using BankRUs.Application.Common.Exceptions;
 
 namespace BankRUs.Api.Controllers;
 
@@ -17,11 +22,13 @@ public class BankAccountsController : ControllerBase
 {
     private readonly OpenBankAccountHandler _openBankAccountHandler;
     private readonly CreateDepositHandler _createDepositHandler;
+    private readonly CreateWithdrawalHandler _createWithdrawalHandler;
 
-    public BankAccountsController(OpenBankAccountHandler openBankAccountHandler, CreateDepositHandler createDepositHandler)
+    public BankAccountsController(OpenBankAccountHandler openBankAccountHandler, CreateDepositHandler createDepositHandler, CreateWithdrawalHandler createWithdrawalHandler)
     {
         _openBankAccountHandler = openBankAccountHandler;
         _createDepositHandler = createDepositHandler;
+        _createWithdrawalHandler = createWithdrawalHandler;
     }
 
     // POST /api/bank-accounts
@@ -81,4 +88,61 @@ public class BankAccountsController : ControllerBase
 
 
     }
+    [Authorize]
+    [HttpPost("{bankAccountId}/withdrawals")]
+ 
+
+public async Task<IActionResult> CreateWithdrawal(
+    [FromRoute] Guid bankAccountId,
+    [FromBody] WithdrawRequestDto request)
+{
+    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+    try
+    {
+        var result = await _createWithdrawalHandler.HandleAsync(
+            new CreateWithdrawalCommand(
+                bankAccountId,
+                request.Amount,
+                request.Reference,
+                userId!)
+        );
+
+        if (result is null)
+            return NotFound();
+
+        var response = new WithdrawResponseDto(
+            TransactionId: result.TransactionId,
+            Type: result.Type,
+            Amount: result.Amount,
+            Reference: result.Reference,
+            CreatedAt: result.CreatedAt,
+            BalanceAfter: result.BalanceAfter
+        );
+
+        return Created(string.Empty, response);
+    }
+    catch (InsufficientFundsException ex)
+    {
+        return Conflict(new ProblemDetails
+        {
+            Type = "https://httpstatuses.com/409",
+            Title = "Insufficient funds",
+            Status = StatusCodes.Status409Conflict,
+            Detail = ex.Message
+        });
+    }
+    catch (ValidationException ex)
+    {
+        return BadRequest(new ProblemDetails
+        {
+            Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+            Title = "Validation error",
+            Status = StatusCodes.Status400BadRequest,
+            Detail = ex.Message
+        });
+    }
+}
+
+
 }

@@ -30,7 +30,8 @@ public class IdentityService : IIdentityService
 
         if (!result.Succeeded)
         {
-            throw new Exception("Unable to create user");
+            var errors = string.Join(" | ", result.Errors.Select(e => $"{e.Code}: {e.Description}"));
+            throw new Exception($"Unable to create user. {errors}");
         }
 
         await _userManager.AddToRoleAsync(user, Roles.Customer);
