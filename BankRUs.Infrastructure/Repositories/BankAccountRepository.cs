@@ -35,4 +35,27 @@ public class BankAccountRepository : IBankAccountRepository
     {
         await _db.SaveChangesAsync();
     }
+
+    public Task<int> CountTransactionsAsync(Guid bankAccountId)
+        => _db.Transactions.CountAsync(t => t.BankAccountId == bankAccountId);
+
+    public async Task<IReadOnlyList<Transaction>> ListTransactionsAsync(Guid bankAccountId, int page, int pageSize, string sort)
+    {
+        var skip = (page - 1) * pageSize;
+
+        var query = _db.Transactions
+         .Where(t => t.BankAccountId == bankAccountId);
+
+        query = sort == "asc"
+            ? query.OrderBy(t => t.CreatedAt).ThenBy(t => t.Id)
+            : query.OrderByDescending(t => t.CreatedAt).ThenByDescending(t => t.Id);
+
+        return await query
+            .Skip(skip)
+            .Take(pageSize)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+   
 }

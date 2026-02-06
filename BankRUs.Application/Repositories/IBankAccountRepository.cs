@@ -9,4 +9,14 @@ public interface IBankAccountRepository
     Task SaveChangesAsync();
     Task<BankAccount?> GetByIdAsync(Guid bankAccountId);
 
+    Task<int> CountTransactionsAsync(Guid bankAccountId);
+
+    Task<IReadOnlyList<Transaction>> ListTransactionsAsync(
+        Guid bankAccountId,
+        int page,
+        int pageSize,
+        string sort
+    );
+
+
 }

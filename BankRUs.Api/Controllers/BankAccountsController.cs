@@ -1,7 +1,9 @@
 ﻿using BankRUs.Api.Dtos.BankAccounts;
 using BankRUs.Application.Common.Exceptions;
+
 using BankRUs.Application.UseCases.CreateDeposit;
 using BankRUs.Application.UseCases.CreateWithdrawal;
+using BankRUs.Application.UseCases.ListTransactions;
 using BankRUs.Application.UseCases.OpenBankAccount;
 using BankRUs.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
@@ -10,9 +12,8 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.ComponentModel.DataAnnotations;
+
 using System.Security.Claims;
-using System.ComponentModel.DataAnnotations;
-using BankRUs.Application.Common.Exceptions;
 
 namespace BankRUs.Api.Controllers;
 
@@ -23,12 +24,17 @@ public class BankAccountsController : ControllerBase
     private readonly OpenBankAccountHandler _openBankAccountHandler;
     private readonly CreateDepositHandler _createDepositHandler;
     private readonly CreateWithdrawalHandler _createWithdrawalHandler;
+    private readonly ListTransactionsHandler _listTransactionsHandler;
 
-    public BankAccountsController(OpenBankAccountHandler openBankAccountHandler, CreateDepositHandler createDepositHandler, CreateWithdrawalHandler createWithdrawalHandler)
+    public BankAccountsController(OpenBankAccountHandler openBankAccountHandler,
+        CreateDepositHandler createDepositHandler,
+        CreateWithdrawalHandler createWithdrawalHandler,
+        ListTransactionsHandler listTransactionsHandler)
     {
         _openBankAccountHandler = openBankAccountHandler;
         _createDepositHandler = createDepositHandler;
         _createWithdrawalHandler = createWithdrawalHandler;
+        _listTransactionsHandler = listTransactionsHandler;
     }
 
     // POST /api/bank-accounts
@@ -71,7 +77,8 @@ public class BankAccountsController : ControllerBase
         request.Reference,
         userId));
 
-        if (createDepositResult == null) {
+        if (createDepositResult == null)
+        {
             return NotFound();
         }
 
@@ -90,59 +97,101 @@ public class BankAccountsController : ControllerBase
     }
     [Authorize]
     [HttpPost("{bankAccountId}/withdrawals")]
- 
 
-public async Task<IActionResult> CreateWithdrawal(
+
+    public async Task<IActionResult> CreateWithdrawal(
     [FromRoute] Guid bankAccountId,
     [FromBody] WithdrawRequestDto request)
-{
-    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-    try
     {
-        var result = await _createWithdrawalHandler.HandleAsync(
-            new CreateWithdrawalCommand(
-                bankAccountId,
-                request.Amount,
-                request.Reference,
-                userId!)
-        );
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        if (result is null)
-            return NotFound();
-
-        var response = new WithdrawResponseDto(
-            TransactionId: result.TransactionId,
-            Type: result.Type,
-            Amount: result.Amount,
-            Reference: result.Reference,
-            CreatedAt: result.CreatedAt,
-            BalanceAfter: result.BalanceAfter
-        );
-
-        return Created(string.Empty, response);
-    }
-    catch (InsufficientFundsException ex)
-    {
-        return Conflict(new ProblemDetails
+        try
         {
-            Type = "https://httpstatuses.com/409",
-            Title = "Insufficient funds",
-            Status = StatusCodes.Status409Conflict,
-            Detail = ex.Message
-        });
-    }
-    catch (ValidationException ex)
-    {
-        return BadRequest(new ProblemDetails
+            var result = await _createWithdrawalHandler.HandleAsync(
+                new CreateWithdrawalCommand(
+                    bankAccountId,
+                    request.Amount,
+                    request.Reference,
+                    userId!)
+            );
+
+            if (result is null)
+                return NotFound();
+
+            var response = new WithdrawResponseDto(
+                TransactionId: result.TransactionId,
+                Type: result.Type,
+                Amount: result.Amount,
+                Reference: result.Reference,
+                CreatedAt: result.CreatedAt,
+                BalanceAfter: result.BalanceAfter
+            );
+
+            return Created(string.Empty, response);
+        }
+        catch (InsufficientFundsException ex)
         {
-            Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
-            Title = "Validation error",
-            Status = StatusCodes.Status400BadRequest,
-            Detail = ex.Message
-        });
+            return Conflict(new ProblemDetails
+            {
+                Type = "https://httpstatuses.com/409",
+                Title = "Insufficient funds",
+                Status = StatusCodes.Status409Conflict,
+                Detail = ex.Message
+            });
+        }
+        catch (ValidationException ex)
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+                Title = "Validation error",
+                Status = StatusCodes.Status400BadRequest,
+                Detail = ex.Message
+            });
+        }
     }
-}
+
+    [ApiController]
+    [Route("api/me")]
+    [Authorize]
+    public class MeController : ControllerBase
+    {
+        private readonly ListTransactionsHandler _handler;
+
+        public MeController(ListTransactionsHandler handler)
+        {
+            _handler = handler;
+        }
+
+        [HttpGet("accounts/{bankAccountId:guid}/transactions")]
+        public async Task<IActionResult> ListTransactions(
+            [FromRoute] Guid bankAccountId,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 20,
+            [FromQuery] string sort = "desc"
+            )
 
 
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(userId))
+                return Unauthorized();
+
+            sort = sort?.ToLower() == "asc" ? "asc" : "desc";
+
+
+            var result = await _handler.HandleAsync(new ListTransactionsQuery(
+                BankAccountId: bankAccountId,
+                UserId: userId,
+                Page: page,
+                PageSize: pageSize,
+                Sort: sort
+            ));
+
+            if (result is null)
+                return NotFound();
+
+            return Ok(result);
+        }
+    }
 }
