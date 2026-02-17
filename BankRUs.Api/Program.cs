@@ -1,12 +1,15 @@
+using BankRUs.Api;
 using BankRUs.Application.Authentication;
 using BankRUs.Application.Authentication.AuthenticateUser;
 using BankRUs.Application.Identity;
 using BankRUs.Application.Repositories;
 using BankRUs.Application.UseCases.CreateDeposit;
+using BankRUs.Application.UseCases.Customers.GetCustomer;
+using BankRUs.Application.UseCases.Customers.ListCustomers;
 using BankRUs.Application.UseCases.OpenAccount;
 using BankRUs.Application.UseCases.OpenBankAccount;
-using BankRUs.Infrastructure.Configuration;
 using BankRUs.Infrastructure.Autentication;
+using BankRUs.Infrastructure.Configuration;
 using BankRUs.Infrastructure.Identity;
 using BankRUs.Infrastructure.Persistance;
 using BankRUs.Infrastructure.Repositories;
@@ -20,8 +23,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using IEmailSender = BankRUs.Application.Services.IEmailSender;
-using BankRUs.Application.UseCases.Customers.ListCustomers;
-using BankRUs.Api;
 
 
 
@@ -56,6 +57,7 @@ builder.Services.AddScoped<OpenBankAccountHandler>();
 builder.Services.AddScoped<AuthenticateUserHandler>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<ListCustomersHandler>();
+builder.Services.AddScoped<GetCustomerHandler>();
 
 
 

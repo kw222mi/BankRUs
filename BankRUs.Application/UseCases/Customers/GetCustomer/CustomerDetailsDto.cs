@@ -12,5 +12,6 @@ public record CustomerBankAccountDto(
     Guid Id,
     string AccountNumber,
     string Name,
-    decimal Balance
+    decimal Balance,
+    bool IsLocked
 );
