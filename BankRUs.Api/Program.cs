@@ -15,12 +15,13 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using IEmailSender = BankRUs.Application.Services.IEmailSender;
+using BankRUs.Application.UseCases.Customers.ListCustomers;
+using BankRUs.Api;
 
 
 
@@ -53,12 +54,19 @@ builder.Services.AddScoped<OpenAccountHandler>();
 builder.Services.AddScoped<CreateDepositHandler>();
 builder.Services.AddScoped<OpenBankAccountHandler>();
 builder.Services.AddScoped<AuthenticateUserHandler>();
+builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<ListCustomersHandler>();
+
 
 
 // Services
 builder.Services.AddScoped<IIdentityService, IdentityService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+
+var maxPageSize = builder.Configuration.GetValue<int>("QueryParams:MaxPageSize", 50);
+builder.Services.AddSingleton(new QueryParamsOptions(maxPageSize));
+
 
 if (builder.Environment.IsDevelopment())
 {

@@ -1,4 +1,4 @@
-﻿using BankRUs.Api.Dtos.Common;
+﻿using BankRUs.Application.Common.Paging;
 
 namespace BankRUs.Api.Dtos.Transactions;
 

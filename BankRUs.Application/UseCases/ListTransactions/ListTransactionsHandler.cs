@@ -1,4 +1,5 @@
-﻿using BankRUs.Application.Repositories;
+﻿using BankRUs.Application.Common.Paging;
+using BankRUs.Application.Repositories;
 
 namespace BankRUs.Application.UseCases.ListTransactions;
 
@@ -42,14 +43,25 @@ public class ListTransactionsHandler
             BalanceAfter: t.BalanceAfter
         )).ToList();
 
+        var paging = new PagingDto (
+            Page: page,
+            PageSize: pageSize,
+            TotalCount: totalCount,
+            TotalPages: pageSize == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize)
+            );
+
+        var pagedResult= new PagedResult<ListTransactionItem>(
+            Items: items,
+            Paging: paging
+            );
+
+
         // 6) Returnera
         return new ListTransactionsResult(
             AccountId: account.Id,
             Balance: account.Balance,
-            Page: page,
-            PageSize: pageSize,
-            TotalCount: totalCount,
-            Items: items
+            Transactions: pagedResult
+            
         );
     }
 }
