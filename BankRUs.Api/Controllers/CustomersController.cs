@@ -2,10 +2,11 @@
 using BankRUs.Application.Identity;
 using BankRUs.Application.UseCases.Customers.GetCustomer;
 using BankRUs.Application.UseCases.Customers.ListCustomers;
+using BankRUs.Application.UseCases.Customers.SearchCustomers;
 using BankRUs.Infrastructure.Identity; // <- Roles
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using BankRUs.Application.UseCases.Customers.GetCustomer;
+
 
 [ApiController]
 [Route("api/customers")]
@@ -15,20 +16,24 @@ public class CustomersController : ControllerBase
     private readonly ListCustomersHandler _handler;
     private readonly QueryParamsOptions _opts;
     private readonly GetCustomerHandler _getCustomerHandler;
+    private readonly SearchCustomersHandler _searchHandler;
 
-    public CustomersController(ListCustomersHandler handler, QueryParamsOptions opts, GetCustomerHandler getCustomerHandler)
+    public CustomersController(
+        ListCustomersHandler handler, 
+        QueryParamsOptions opts, 
+        GetCustomerHandler getCustomerHandler, 
+        SearchCustomersHandler searchCustomersHandler)
     {
         _handler = handler;
         _opts = opts;
         _getCustomerHandler = getCustomerHandler;
+        _searchHandler = searchCustomersHandler;
     }
 
     [HttpGet]
-    public async Task<IActionResult> Get([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+    public async Task<IActionResult> Get([FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] string? ssn = null)
     {
-        var result = await _handler.HandleAsync(
-            new ListCustomersQuery(page, pageSize),
-            _opts.MaxPageSize);
+        var result = await _searchHandler.HandleAsync(new SearchCustomersQuery(page, pageSize, ssn), _opts.MaxPageSize);
 
         return Ok(new
         {
@@ -39,6 +44,8 @@ public class CustomersController : ControllerBase
             totalPages = result.Paging.TotalPages
         });
     }
+
+   
 
 
     [HttpGet("{id}")]
@@ -64,5 +71,8 @@ public class CustomersController : ControllerBase
                 isLocked = a.IsLocked
             })
         });
+
+        
+
     }
 }

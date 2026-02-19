@@ -8,4 +8,10 @@ public interface ICustomerRepository
     Task<(IReadOnlyList<CustomerListItem> Items, int TotalItems)> ListAsync(int page, int pageSize);
 
     Task<CustomerDetailsDto?> GetByIdAsync(string customerId);
+
+    Task<(IReadOnlyList<CustomerListItem> Items, int TotalItems)> ListAsync(
+        int page,
+        int pageSize,
+        string? ssn
+    );
 }

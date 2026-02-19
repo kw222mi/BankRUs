@@ -71,4 +71,35 @@ public class CustomerRepository : ICustomerRepository
             BankAccounts: bankAccounts
         );
     }
+
+    public async Task<(IReadOnlyList<CustomerListItem> Items, int TotalItems)> ListAsync(int page, int pageSize, string? ssn)
+    {
+        var query = _db.Users.AsNoTracking();
+
+        if (!string.IsNullOrWhiteSpace(ssn))
+        {
+            ssn = ssn.Trim();
+            query = query.Where(u => u.SocialSecurityNumber.StartsWith(ssn));
+        }
+
+        query = query
+            .OrderBy(u => u.LastName)
+            .ThenBy(u => u.FirstName);
+
+        var total = await query.CountAsync();
+
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(u => new CustomerListItem(
+                u.Id,
+                u.FirstName,
+                u.LastName,
+                u.Email!
+            ))
+            .ToListAsync();
+
+        return (items, total);
+    }
+
 }

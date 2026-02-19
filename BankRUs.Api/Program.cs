@@ -6,6 +6,7 @@ using BankRUs.Application.Repositories;
 using BankRUs.Application.UseCases.CreateDeposit;
 using BankRUs.Application.UseCases.Customers.GetCustomer;
 using BankRUs.Application.UseCases.Customers.ListCustomers;
+using BankRUs.Application.UseCases.Customers.SearchCustomers;
 using BankRUs.Application.UseCases.OpenAccount;
 using BankRUs.Application.UseCases.OpenBankAccount;
 using BankRUs.Infrastructure.Autentication;
@@ -58,6 +59,8 @@ builder.Services.AddScoped<AuthenticateUserHandler>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<ListCustomersHandler>();
 builder.Services.AddScoped<GetCustomerHandler>();
+builder.Services.AddScoped<SearchCustomersHandler>();
+
 
 
 
@@ -190,7 +193,6 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 // GET /api/me
-// Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30
 
 app.UseAuthentication();
 app.UseAuthorization();
